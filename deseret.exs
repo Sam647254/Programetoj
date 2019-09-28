@@ -41,6 +41,7 @@ defmodule Deseret do
 			?𐑏 => ?𐑿,
 			?𐑎 => ?𐑶,
 			?𐐪 => ?𐑭,
+			?~ => ?·,
 		}
 
 		digrafoj = %{
@@ -53,20 +54,19 @@ defmodule Deseret do
 		}
 
 		malgranda_kodopuktoj = kodopunktoj |> Enum.map(
-			fn k -> if k in ?𐐀..?𐐧, do: k + 40, else: k end
+			fn k -> <<kp1::utf8>> = k; if kp1 in ?𐐀..?𐐧, do: kp1 + 40, else: kp1 end
 		)
 		kodopunktoj2 = Enum.drop(malgranda_kodopuktoj, 1)
 
-		{rezulto, _ } = Enum.zip(kodopunktoj, kodopunktoj2) |> Enum.map_reduce(
+		{rezulto, _ } = Enum.zip(malgranda_kodopuktoj, kodopunktoj2) |> Enum.map_reduce(
 			%{saŭto: false},
 			fn {k1, k2}, %{saŭto: saŭto} ->
-				digrafo = Enum.join([k1, k2], "")
-				<<kp1::utf8>> = k1
+				digrafo = List.to_string [k1, k2]
 				cond do
 					saŭto -> {0, %{saŭto: false}}
 					Map.has_key?(digrafoj, digrafo) -> {digrafoj[digrafo], %{saŭto: true}}
-					kp1 == ?! -> {?𐑩, %{saŭto: true}}
-					Map.has_key?(literoj, kp1) -> {literoj[kp1], %{saŭto: false}}
+					k1 == ?@ -> {?𐑩, %{saŭto: true}}
+					Map.has_key?(literoj, k1) -> {literoj[k1], %{saŭto: false}}
 					true -> {k1, %{saŭto: false}}
 				end
 			end
@@ -75,9 +75,9 @@ defmodule Deseret do
 	end
 
 	def iĝi_en_deseretan(kodopunktoj) do
-		traktakarakteroj = MapSet.new([?!, ?~])
+		traktakarakteroj = MapSet.new([?@, ?~])
 		kodopunktoj
-			|> Enum.filter(fn k -> !MapSet.member?(traktakarakteroj, k) end)
+			|> Enum.filter(fn k -> <<kp1::utf8>> = k; !MapSet.member?(traktakarakteroj, kp1) end)
 			|> List.to_string
 	end
 end
