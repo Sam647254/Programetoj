@@ -51,4 +51,4 @@
 (define eniro (vector-ref argv 0))
 (define eliro (vector-ref argv 1))
 (define teksto (with-input-from-file eniro port->string))
-(with-output-to-file eliro (λ () (printf (latina->miranto teksto))))
+(with-output-to-file eliro (λ () (printf (latina->miranto teksto))) #:exists 'replace)
